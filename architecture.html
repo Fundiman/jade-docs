@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jade architecture — jade-docs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --jade:     #1D9E75;
+    --jade-dim: #0F6E56;
+    --jade-bg:  #E1F5EE;
+    --ink:      #0e1a14;
+    --ink-dim:  #3a5245;
+    --ink-mute: #7a9e8e;
+    --paper:    #f7faf8;
+    --card:     #ffffff;
+    --border:   #d4e8de;
+    --mono:     'DM Mono', monospace;
+    --serif:    'Fraunces', serif;
+    --sans:     'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--sans); background: var(--paper); color: var(--ink); min-height: 100vh; }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    background: var(--card);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .logo-name { font-family: var(--serif); font-weight: 600; font-size: 1.2rem; color: var(--jade-dim); letter-spacing: -0.02em; }
+  .logo-version { font-family: var(--mono); font-size: 0.68rem; color: var(--ink-mute); background: var(--jade-bg); padding: 2px 7px; border-radius: 20px; border: 1px solid var(--border); }
+  nav a { font-size: 0.85rem; color: var(--ink-dim); text-decoration: none; margin-left: 1.5rem; transition: color .15s; }
+  nav a:hover { color: var(--jade); }
+
+  main {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 3rem 2rem 5rem;
+  }
+
+  h1 { font-family: var(--serif); font-size: 2.2rem; font-weight: 300; color: var(--ink); margin: 0 0 1.5rem; letter-spacing: -0.02em; line-height: 1.2; }
+  h2 { font-family: var(--serif); font-size: 1.4rem; font-weight: 300; color: var(--ink); margin: 2.5rem 0 1rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 1rem; font-weight: 500; color: var(--ink); margin: 1.8rem 0 0.6rem; }
+  h4 { font-size: 0.9rem; font-weight: 500; color: var(--ink-dim); margin: 1.2rem 0 0.4rem; }
+  h5, h6 { font-size: 0.85rem; font-weight: 500; color: var(--ink-mute); margin: 1rem 0 0.3rem; }
+
+  p { font-size: 0.95rem; line-height: 1.75; color: var(--ink-dim); margin: 0 0 1rem; }
+  a { color: var(--jade-dim); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  strong { font-weight: 500; color: var(--ink); }
+  em { font-style: italic; }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.82em;
+    background: var(--jade-bg);
+    color: var(--jade-dim);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+
+  pre {
+    background: var(--ink);
+    border-radius: 10px;
+    padding: 1.2rem 1.4rem;
+    margin: 1rem 0 1.5rem;
+    overflow-x: auto;
+    border: 1px solid #1a2e25;
+  }
+  pre code {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.65;
+    background: none;
+    color: #a8e6cf;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+  }
+
+  ul, ol { padding-left: 1.4rem; margin: 0 0 1rem; }
+  li { font-size: 0.95rem; line-height: 1.75; color: var(--ink-dim); margin-bottom: 0.2rem; }
+  li code { font-size: 0.8em; }
+
+  blockquote {
+    border-left: 3px solid var(--jade);
+    padding: 0.6rem 1rem;
+    margin: 1rem 0;
+    background: var(--jade-bg);
+    border-radius: 0 6px 6px 0;
+  }
+  blockquote p { margin: 0; color: var(--jade-dim); font-size: 0.9rem; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.5rem;
+    font-size: 0.88rem;
+  }
+  th {
+    background: var(--jade-bg);
+    color: var(--jade-dim);
+    font-weight: 500;
+    text-align: left;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+  }
+  td {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    color: var(--ink-dim);
+    line-height: 1.5;
+  }
+  tr:nth-child(even) td { background: var(--paper); }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+  }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    background: var(--card);
+  }
+  footer p { font-size: 0.78rem; color: var(--ink-mute); font-family: var(--mono); }
+  footer a { color: var(--jade-dim); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 600px) {
+    nav { display: none; }
+    main { padding: 2rem 1rem 4rem; }
+    h1 { font-size: 1.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo">
+    <svg width="28" height="28" viewBox="0 0 100 100">
+      <polygon points="50,5 85,25 85,75 50,95 15,75 15,25" fill="#E1F5EE" stroke="#1D9E75" stroke-width="3"/>
+      <polygon points="50,20 72,33 72,67 50,80 28,67 28,33" fill="#1D9E75" opacity="0.3"/>
+      <polygon points="50,32 64,40 64,60 50,68 36,60 36,40" fill="#1D9E75" opacity="0.65"/>
+      <circle cx="50" cy="50" r="6" fill="#0F6E56"/>
+    </svg>
+    <span class="logo-name">jade-docs</span>
+    <span class="logo-version">v0.1.0-alpha</span>
+  </a>
+  <nav>
+    <a href="guide/01-getting-started.html">guides</a>
+    <a href="stdlib/io.html">stdlib</a>
+    <a href="reference/syntax.html">reference</a>
+    <a href="https://github.com/Fundiman/JadeLang">github</a>
+  </nav>
+</header>
+
+<main>
+<h1>Jade architecture</h1>
+
+<p>how the whole system fits together.</p>
+
+<hr>
+
+<h2>overview</h2>
+
+<pre><code>your .jsc source code
+        │
+        ▼
+   ┌─────────┐
+   │  jscc   │  — the compiler
+   └─────────┘
+        │  produces
+        ▼
+   ┌─────────┐
+   │  .joc   │  — Jade object code
+   └─────────┘
+        │  loaded by
+        ▼
+   ┌─────────┐
+   │   jvk   │  — the Jade Virtual Kernel
+   └─────────┘
+        │  runs on top of
+        ▼
+   ┌─────────────────────────┐
+   │  HAL (Linux/macOS/Win)  │
+   └─────────────────────────┘
+        │
+        ▼
+      OS + hardware</code></pre>
+
+<hr>
+
+<h2>jscc — the compiler</h2>
+
+<p><code>jscc</code> is a pipeline of 5 stages:</p>
+
+<h3>stage 1 — lexer (<code>lexer.cpp</code>)</h3>
+<p>turns raw <code>.jsc</code> text into a flat list of tokens.</p>
+
+<pre><code>"def main() { return 0; }"
+        ↓
+[KW_DEF, IDENT(main), LPAREN, RPAREN, LBRACE, KW_RETURN, INT(0), SEMICOLON, RBRACE]</code></pre>
+
+<p>every token has a line and column number for error reporting.</p>
+
+<h3>stage 2 — parser (<code>parser.cpp</code>)</h3>
+<p>turns the token list into an Abstract Syntax Tree (AST).</p>
+
+<pre><code>[KW_DEF, IDENT(main), ...]
+        ↓
+Stmt::DEF {
+  fn_name: "main"
+  fn_body: [
+    Stmt::RETURN { return_val: Expr::INT_LIT(0) }
+  ]
+}</code></pre>
+
+<p>the parser handles: functions, classes, sealed classes, generics, when expressions, async, decorators, type aliases, imports, packages.</p>
+
+<h3>stage 3 — import resolver (<code>import_resolver.cpp</code>)</h3>
+<p>resolves <code>import jade.stdlib.io</code> into actual symbols.</p>
+
+<ul><li>checks <code>jade_modules/</code> first (local)</li><li>checks <code>~/.jade/registry/</code> second (global cache)</li><li>stdlib packages are registered directly in code</li><li>injects module symbols into the global scope</li></ul>
+
+<h3>stage 4 — semantic analysis (<code>sema.cpp</code>)</h3>
+<p>type checks the AST and catches errors before codegen.</p>
+
+<p>checks:</p>
+<ul><li>undefined variables → <code>JD301</code></li><li>undefined functions → <code>JD301</code></li><li>type mismatches → <code>JD201</code></li><li>assigning to <code>val</code> → <code>JD302</code></li><li>redeclaration → <code>JD303</code></li><li>naming conventions (PascalCase classes, camelCase functions) → <code>JD601/602</code></li><li>when arm bindings (injects pattern variables into scope)</li></ul>
+
+<p>errors use Rust-style output with file, line, column, underline, and <code>help:</code> hints.</p>
+
+<h3>stage 5 — codegen (<code>codegen.cpp</code>)</h3>
+<p>turns the AST into LLVM IR, then into native machine code.</p>
+
+<pre><code>AST
+ ↓
+LLVM IR (human-readable intermediate representation)
+ ↓
+native x86_64 / ARM64 / etc object code
+ ↓
+.joc file (multi-arch fat binary)</code></pre>
+
+<p>uses LLVM 18 as the backend. LLVM handles register allocation, instruction selection, and optimization. the codegen just builds the IR.</p>
+
+<hr>
+
+<h2>the .joc format</h2>
+
+<p><code>.joc</code> is a fat binary with a custom header:</p>
+
+<pre><code>[4 bytes]   magic: "JADE"
+[1 byte]    version: 1
+[1 byte]    flags: bit0=has_bytecode, bit1=bytecode_only
+[2 bytes]   reserved
+[4 bytes]   num_slices
+[4 bytes]   metadata_len
+[N bytes]   metadata (package name)
+
+slice directory (20 bytes per slice):
+  [4 bytes]   arch tag: "x86_" | "ARM_" | "RV64" | "LLBC"
+  [8 bytes]   offset
+  [8 bytes]   size
+
+slice data:
+  [raw bytes] native object code or LLVM bitcode</code></pre>
+
+<p>a <code>.joc</code> always contains an <code>LLBC</code> (LLVM bitcode) slice by default. native slices are added with <code>--target</code>. on any machine, <code>jvk</code> picks the best slice — native if available, LLBC+JIT otherwise.</p>
+
+<hr>
+
+<h2>jvk — the Jade Virtual Kernel</h2>
+
+<h3>startup sequence</h3>
+
+<pre><code>1. parse flags (--jit-only, --native-only, --mem, etc)
+2. JocLoader::load() — read .joc into memory, parse manifest
+3. JocLoader::best_slice() — find native slice or fall back to LLBC
+4. HAL::create() — create platform-specific HAL
+5. Runtime::init() — set up VFS, scheduler, memory manager
+6. run_native() or run_jit() — execute the program</code></pre>
+
+<h3>HAL (Host Abstraction Layer)</h3>
+
+<p><code>hal.hpp</code> defines a pure virtual interface. three implementations:</p>
+
+<ul><li><code>hal_linux.cpp</code> — mmap, pthreads, epoll</li><li><code>hal_macos.cpp</code> — mmap with MAP_JIT for Apple Silicon, pthreads, kqueue</li><li><code>hal_windows.cpp</code> — VirtualAlloc, CreateThread, Win32 I/O</li></ul>
+
+<p>the HAL abstracts: memory allocation, executable memory mapping, threads, file I/O, time, process control.</p>
+
+<h3>native execution (<code>run_native</code>)</h3>
+
+<p>uses LLVM's <code>RuntimeDyld</code>:</p>
+<ol><li>wraps the native slice bytes in an LLVM <code>MemoryBuffer</code></li><li>parses it as an ELF/COFF/MachO object file</li><li><code>RuntimeDyld</code> handles relocations</li><li>a custom <code>SectionMemoryManager</code> resolves host symbols (<code>printf</code>, <code>malloc</code>, etc) via <code>dlsym</code></li><li>finds the <code>main</code> symbol and calls it</li></ol>
+
+<h3>JIT execution (<code>run_jit</code>)</h3>
+
+<p>uses LLVM's <code>MCJIT</code>:</p>
+<ol><li>parses the LLBC slice as LLVM bitcode</li><li>creates an <code>ExecutionEngine</code> with <code>MCJIT</code></li><li><code>finalizeObject()</code> compiles to native</li><li>looks up <code>main</code> and calls it</li></ol>
+
+<p>JIT output is as fast as AOT native after the first run.</p>
+
+<h3>VFS (Virtual Filesystem)</h3>
+
+<p>apps see a virtual path like <code>/data/config.json</code>. the VFS resolves it to a real host path via mount points:</p>
+
+<pre><code class="language-cpp">vfs.mount("/", "/home/user/myapp");
+// /data/config.json → /home/user/myapp/data/config.json</code></pre>
+
+<h3>scheduler</h3>
+
+<p><code>Scheduler</code> wraps OS threads via the HAL. each Jade green thread maps to one OS thread. a real fiber/coroutine scheduler is planned for async support.</p>
+
+<h3>memory manager</h3>
+
+<p><code>MemoryManager</code> currently delegates to the HAL's mmap. a proper slab allocator + the RC garbage collector from <code>jade_stdlib</code> will be wired in.</p>
+
+<hr>
+
+<h2>jade_stdlib — the standard library</h2>
+
+<p>written in C++ with C-linkage exports so <code>jvk</code>'s <code>RuntimeDyld</code> can resolve them by name.</p>
+
+<h3>garbage collector (<code>gc/gc.cpp</code>)</h3>
+
+<p>implements Bacon-Rajan deferred reference counting with cycle detection:</p>
+
+<ul><li>every heap object has a <code>GcHeader</code> (rc, color, type_id, trace/destroy function pointers)</li><li><code>Rc&lt;T&gt;</code> is the smart pointer — increment on copy, decrement on destroy</li><li>when rc hits 0 → immediate free</li><li>when rc &gt; 0 but object looks like a cycle root → added to candidate buffer</li><li>when buffer fills → Bacon-Rajan mark-gray → scan → collect-white phases</li><li>cycle detector runs in the background, stops the world only during collection</li></ul>
+
+<h3>string interpolation (<code>src/interp.cpp</code>)</h3>
+
+<p><code>#{var}</code> is resolved at runtime via <code>InterpolatedString</code>:</p>
+<ul><li>compiler emits calls to <code>jade_interp_literal()</code> and <code>jade_interp_str/int/float/bool()</code></li><li><code>jade_interp_build()</code> concatenates everything into the final string</li></ul>
+
+<hr>
+
+<h2>jpkg — the package manager</h2>
+
+<p>written in Python. three files:</p>
+
+<ul><li><code>jpkg.py</code> — entry point, command dispatch</li><li><code>config.py</code> — jade.toml parser, semver resolution</li><li><code>registry.py</code> — GitHub registry client, download, publish</li></ul>
+
+<h3>package resolution</h3>
+
+<pre><code>jade.toml declares "jade.stdlib.http" = "^1.0.0"
+        ↓
+registry.py fetches packages/jade/stdlib/http/info.json from jade-pkgs
+        ↓
+finds versions satisfying ^1.0.0
+        ↓
+downloads to ~/.jade/registry/jade/stdlib/http/1.0.0/
+        ↓
+symlinks into jade_modules/jade.stdlib.http@1.0.0/</code></pre>
+
+<h3>publish flow</h3>
+
+<pre><code>jpkg publish
+        ↓
+build .joc if missing
+        ↓
+gh repo fork Fundiman/jade-pkgs
+        ↓
+git clone jade-pkgs into temp dir
+        ↓
+create branch pkg/name/version
+        ↓
+copy jade.toml + out.joc into packages/name/version/
+        ↓
+update packages/index.json
+        ↓
+git commit + push to fork
+        ↓
+gh pr create → Fundiman/jade-pkgs</code></pre>
+
+<hr>
+
+<h2>JadeUI</h2>
+
+<p>declarative UI framework. three layers:</p>
+
+<pre><code>Jade app code (.jsc)
+        ↓
+JadeUI widget tree (C++)
+  Widget → Column → Row → Button → Text...
+        ↓
+IRenderer (abstract interface)
+        ↓
+SkiaRenderer (Skia GPU renderer)
+        ↓
+SDL2 OpenGL window
+        ↓
+OS window system</code></pre>
+
+<h3>layout</h3>
+
+<p>inspired by Flutter's layout model:</p>
+<ol><li><code>measure(constraints)</code> — widget reports desired size</li><li><code>layout(bounds)</code> — widget places itself and its children</li><li><code>paint(renderer)</code> — widget draws itself</li></ol>
+
+<h3>event handling</h3>
+
+<p>SDL2 events → translated to <code>jade::ui::Event</code> → bubbled through widget tree from leaf to root. first widget that returns <code>true</code> from <code>handle_event</code> consumes the event.</p>
+
+</main>
+
+<footer>
+  <p>© 2026 <a href="https://github.com/Fundiman">Fundiman</a> — <a href="https://github.com/Fundiman/jade-docs">jade-docs</a> — <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a></p>
+  <p><a href="https://github.com/Fundiman/JadeLang">JadeLang</a> · <a href="https://github.com/Fundiman/jade-pkgs">jade-pkgs</a> · <a href="https://github.com/Fundiman/jade-docs">jade-docs</a></p>
+</footer>
+
+</body>
+</html>

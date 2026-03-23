@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>learn Jade — a beginner's guide — jade-docs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --jade:     #1D9E75;
+    --jade-dim: #0F6E56;
+    --jade-bg:  #E1F5EE;
+    --ink:      #0e1a14;
+    --ink-dim:  #3a5245;
+    --ink-mute: #7a9e8e;
+    --paper:    #f7faf8;
+    --card:     #ffffff;
+    --border:   #d4e8de;
+    --mono:     'DM Mono', monospace;
+    --serif:    'Fraunces', serif;
+    --sans:     'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--sans); background: var(--paper); color: var(--ink); min-height: 100vh; }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    background: var(--card);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .logo-name { font-family: var(--serif); font-weight: 600; font-size: 1.2rem; color: var(--jade-dim); letter-spacing: -0.02em; }
+  .logo-version { font-family: var(--mono); font-size: 0.68rem; color: var(--ink-mute); background: var(--jade-bg); padding: 2px 7px; border-radius: 20px; border: 1px solid var(--border); }
+  nav a { font-size: 0.85rem; color: var(--ink-dim); text-decoration: none; margin-left: 1.5rem; transition: color .15s; }
+  nav a:hover { color: var(--jade); }
+
+  main {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 3rem 2rem 5rem;
+  }
+
+  h1 { font-family: var(--serif); font-size: 2.2rem; font-weight: 300; color: var(--ink); margin: 0 0 1.5rem; letter-spacing: -0.02em; line-height: 1.2; }
+  h2 { font-family: var(--serif); font-size: 1.4rem; font-weight: 300; color: var(--ink); margin: 2.5rem 0 1rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 1rem; font-weight: 500; color: var(--ink); margin: 1.8rem 0 0.6rem; }
+  h4 { font-size: 0.9rem; font-weight: 500; color: var(--ink-dim); margin: 1.2rem 0 0.4rem; }
+  h5, h6 { font-size: 0.85rem; font-weight: 500; color: var(--ink-mute); margin: 1rem 0 0.3rem; }
+
+  p { font-size: 0.95rem; line-height: 1.75; color: var(--ink-dim); margin: 0 0 1rem; }
+  a { color: var(--jade-dim); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  strong { font-weight: 500; color: var(--ink); }
+  em { font-style: italic; }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.82em;
+    background: var(--jade-bg);
+    color: var(--jade-dim);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+
+  pre {
+    background: var(--ink);
+    border-radius: 10px;
+    padding: 1.2rem 1.4rem;
+    margin: 1rem 0 1.5rem;
+    overflow-x: auto;
+    border: 1px solid #1a2e25;
+  }
+  pre code {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.65;
+    background: none;
+    color: #a8e6cf;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+  }
+
+  ul, ol { padding-left: 1.4rem; margin: 0 0 1rem; }
+  li { font-size: 0.95rem; line-height: 1.75; color: var(--ink-dim); margin-bottom: 0.2rem; }
+  li code { font-size: 0.8em; }
+
+  blockquote {
+    border-left: 3px solid var(--jade);
+    padding: 0.6rem 1rem;
+    margin: 1rem 0;
+    background: var(--jade-bg);
+    border-radius: 0 6px 6px 0;
+  }
+  blockquote p { margin: 0; color: var(--jade-dim); font-size: 0.9rem; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.5rem;
+    font-size: 0.88rem;
+  }
+  th {
+    background: var(--jade-bg);
+    color: var(--jade-dim);
+    font-weight: 500;
+    text-align: left;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+  }
+  td {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    color: var(--ink-dim);
+    line-height: 1.5;
+  }
+  tr:nth-child(even) td { background: var(--paper); }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+  }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    background: var(--card);
+  }
+  footer p { font-size: 0.78rem; color: var(--ink-mute); font-family: var(--mono); }
+  footer a { color: var(--jade-dim); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 600px) {
+    nav { display: none; }
+    main { padding: 2rem 1rem 4rem; }
+    h1 { font-size: 1.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../index.html" class="logo">
+    <svg width="28" height="28" viewBox="0 0 100 100">
+      <polygon points="50,5 85,25 85,75 50,95 15,75 15,25" fill="#E1F5EE" stroke="#1D9E75" stroke-width="3"/>
+      <polygon points="50,20 72,33 72,67 50,80 28,67 28,33" fill="#1D9E75" opacity="0.3"/>
+      <polygon points="50,32 64,40 64,60 50,68 36,60 36,40" fill="#1D9E75" opacity="0.65"/>
+      <circle cx="50" cy="50" r="6" fill="#0F6E56"/>
+    </svg>
+    <span class="logo-name">jade-docs</span>
+    <span class="logo-version">v0.1.0-alpha</span>
+  </a>
+  <nav>
+    <a href="../guide/01-getting-started.html">guides</a>
+    <a href="../stdlib/io.html">stdlib</a>
+    <a href="../reference/syntax.html">reference</a>
+    <a href="https://github.com/Fundiman/JadeLang">github</a>
+  </nav>
+</header>
+
+<main>
+<h1>learn Jade — a beginner's guide</h1>
+
+<blockquote><p>Jade is a write once, run anywhere programming language.</p></blockquote>
+<blockquote><p>Ruby's elegance + Go's simplicity + Kotlin's type safety.</p></blockquote>
+<blockquote><p>Curly braces. Semicolons. No excuses.</p></blockquote>
+
+<hr>
+
+<h2>before you start</h2>
+
+<p>you need:</p>
+<ul><li><code>jscc</code> — the Jade compiler</li><li><code>jvk</code> — the Jade runtime</li><li>VS Code + the Jade extension (for syntax highlighting)</li></ul>
+
+<p>build them from <a href="https://github.com/Fundiman/JadeLang">github.com/Fundiman/JadeLang</a> or use <code>jpkg</code>.</p>
+
+<hr>
+
+<h2>chapter 1 — hello world</h2>
+
+<p>every Jade program starts with a package declaration and an entry point.</p>
+
+<pre><code class="language-jade">package com.yourname.hello;
+
+import jade.stdlib.io;
+
+@entry
+def main(args []str) i32 {
+    io.println("hello, world!");
+    return 0;
+}</code></pre>
+
+<p>save it as <code>main.jsc</code>, then:</p>
+
+<pre><code class="language-bash">jscc main.jsc out.joc
+jvk out.joc</code></pre>
+
+<p>output:</p>
+<pre><code>hello, world!</code></pre>
+
+<p><strong>what's happening:</strong></p>
+<ul><li><code>package</code> — declares where this code lives, like an address</li><li><code>import</code> — brings in the standard library</li><li><code>@entry</code> — tells jvk this is where execution starts</li><li><code>def main</code> — defines a function called main</li><li><code>args []str</code> — main receives a list of strings (command line arguments)</li><li><code>i32</code> — main returns a 32-bit integer (0 = success)</li><li><code>io.println</code> — prints a line to the console</li><li><code>return 0</code> — exit with success</li></ul>
+
+<hr>
+
+<h2>chapter 2 — variables</h2>
+
+<p>Jade has two kinds of variables:</p>
+
+<pre><code class="language-jade">val name = "Jade";    // immutable — cannot be changed
+var count = 0;        // mutable — can be changed</code></pre>
+
+<p><code>val</code> is like a constant. once set, it stays that way forever. <code>var</code> can be updated whenever you need.</p>
+
+<pre><code class="language-jade">val x = 10;
+x = 20;        // ERROR — val is immutable!
+
+var y = 10;
+y = 20;        // fine</code></pre>
+
+<h3>types</h3>
+
+<p>Jade can figure out the type automatically (type inference):</p>
+
+<pre><code class="language-jade">val name = "Jade";      // str
+val age  = 12;          // i32
+val pi   = 3.14159;     // f64
+val flag = true;        // bool</code></pre>
+
+<p>or you can write the type yourself:</p>
+
+<pre><code class="language-jade">val name str  = "Jade";
+val age  i32  = 12;
+val pi   f64  = 3.14159;
+val flag bool = true;</code></pre>
+
+<h3>number types</h3>
+
+<table><tr><th>type</th><th>what it is</th></tr><tr><td>i32</td><td>integer (-2 billion to 2 billion)</td></tr><tr><td>i64</td><td>big integer</td></tr><tr><td>u32</td><td>positive integer only</td></tr><tr><td>f64</td><td>decimal number (double)</td></tr><tr><td>f32</td><td>smaller decimal number</td></tr></table>
+
+<h3>string interpolation</h3>
+
+<p>put variables inside strings with <code>#{}</code>:</p>
+
+<pre><code class="language-jade">val name    = "Jade";
+val version = 1;
+
+io.println("hello from #{name} v#{version}!");
+// prints: hello from Jade v1!
+
+io.println("2 + 2 = #{2 + 2}");
+// prints: 2 + 2 = 4</code></pre>
+
+<hr>
+
+<h2>chapter 3 — functions</h2>
+
+<pre><code class="language-jade">def add(a i32, b i32) i32 {
+    return a + b;
+}</code></pre>
+
+<ul><li><code>def</code> — declares a function</li><li><code>add</code> — the function name (camelCase)</li><li><code>(a i32, b i32)</code> — parameters: name then type</li><li><code>i32</code> after <code>)</code> — return type</li><li><code>return</code> — sends back a value</li></ul>
+
+<h3>single expression functions</h3>
+
+<p>if your function is just one expression, use <code>=</code>:</p>
+
+<pre><code class="language-jade">def add(a i32, b i32) i32 = a + b;
+
+def greet(name str) str = "hello #{name}!";</code></pre>
+
+<h3>default arguments</h3>
+
+<pre><code class="language-jade">def greet(name str = "world") str = "hello #{name}!";
+
+greet();           // "hello world!"
+greet("Jade");     // "hello Jade!"</code></pre>
+
+<h3>multiple return values</h3>
+
+<pre><code class="language-jade">def minMax(arr []i32) (i32, i32) {
+    return (0, 100);   // (min, max)
+}
+
+val (lo, hi) = minMax(numbers);</code></pre>
+
+<h3>async functions</h3>
+
+<pre><code class="language-jade">async def fetchData(url str) Result&lt;str&gt; {
+    val response = http.get(url).await();
+    return response;
+}</code></pre>
+
+<hr>
+
+<h2>chapter 4 — control flow</h2>
+
+<h3>if / else</h3>
+
+<pre><code class="language-jade">val x = 42;
+
+if x &gt; 100 {
+    io.println("big");
+} else if x &gt; 50 {
+    io.println("medium");
+} else {
+    io.println("small");
+}</code></pre>
+
+<h3>for loop</h3>
+
+<pre><code class="language-jade">// loop over a range
+for i in 0..10 {
+    io.println("#{i}");
+}
+
+// loop over a collection
+val names = ["Alice", "Bob", "Charlie"];
+for name in names {
+    io.println("hello #{name}!");
+}</code></pre>
+
+<h3>while loop</h3>
+
+<pre><code class="language-jade">var count = 0;
+while count &lt; 5 {
+    io.println("count: #{count}");
+    count += 1;
+}</code></pre>
+
+<h3>when (pattern matching)</h3>
+
+<p><code>when</code> is like a supercharged switch statement:</p>
+
+<pre><code class="language-jade">val x = 42;
+
+when x {
+    is 1  -&gt; io.println("one");
+    is 42 -&gt; io.println("the answer!");
+    is _  -&gt; io.println("something else");
+}</code></pre>
+
+<p>it's most powerful with sealed classes (see chapter 6).</p>
+
+<hr>
+
+<h2>chapter 5 — collections</h2>
+
+<h3>arrays</h3>
+
+<pre><code class="language-jade">val numbers = [1, 2, 3, 4, 5];
+val names   = ["Alice", "Bob", "Charlie"];
+
+io.println("#{numbers[0]}");    // 1
+io.println("#{names.len()}");   // 3</code></pre>
+
+<h3>list (dynamic array)</h3>
+
+<pre><code class="language-jade">import jade.stdlib.collections;
+
+var list = List&lt;i32&gt;.new();
+list.push(1);
+list.push(2);
+list.push(3);
+
+io.println("#{list.len()}");    // 3
+io.println("#{list.get(1)}");   // 2</code></pre>
+
+<h3>map (dictionary)</h3>
+
+<pre><code class="language-jade">var scores = Map&lt;str, i32&gt;.new();
+scores.set("Alice", 95);
+scores.set("Bob",   87);
+
+io.println("#{scores.get("Alice")}");  // 95</code></pre>
+
+<h3>set (unique values)</h3>
+
+<pre><code class="language-jade">var unique = Set&lt;str&gt;.new();
+unique.add("apple");
+unique.add("banana");
+unique.add("apple");   // duplicate — ignored
+
+io.println("#{unique.len()}");  // 2</code></pre>
+
+<hr>
+
+<h2>chapter 6 — classes</h2>
+
+<h3>data class</h3>
+
+<p>a data class is a simple container for values:</p>
+
+<pre><code class="language-jade">data class Point(val x f64, val y f64);
+
+val p = Point(1.0, 2.0);
+io.println("#{p.x}, #{p.y}");  // 1, 2</code></pre>
+
+<h3>regular class</h3>
+
+<pre><code class="language-jade">class Counter {
+    var count i32
+
+    def increment() {
+        count += 1;
+    }
+
+    def value() i32 = count;
+}
+
+val c = Counter.new();
+c.increment();
+c.increment();
+io.println("#{c.value()}");  // 2</code></pre>
+
+<h3>generic class</h3>
+
+<pre><code class="language-jade">class Box&lt;T&gt; {
+    val item T
+
+    def get() T = item;
+}
+
+val box = Box&lt;str&gt;.new("hello");
+io.println(box.get());  // hello</code></pre>
+
+<h3>sealed class (enums with data)</h3>
+
+<p>sealed classes are one of Jade's most powerful features:</p>
+
+<pre><code class="language-jade">sealed class Shape {
+    data class Circle(val radius f64)
+    data class Rectangle(val w f64, val h f64)
+    data class Triangle(val base f64, val height f64)
+}
+
+def area(s Shape) f64 {
+    return when s {
+        is Circle(r)        -&gt; 3.14159 * r * r;
+        is Rectangle(w, h)  -&gt; w * h;
+        is Triangle(b, h)   -&gt; 0.5 * b * h;
+    };
+}
+
+val c = Shape.Circle(5.0);
+io.println("area: #{area(c)}");  // area: 78.5397</code></pre>
+
+<h3>traits (interfaces)</h3>
+
+<pre><code class="language-jade">trait Printable {
+    def print() void;
+}
+
+class Dog {
+    val name str
+
+    def print() void {
+        io.println("dog: #{name}");
+    }
+}</code></pre>
+
+<hr>
+
+<h2>chapter 7 — error handling</h2>
+
+<p>Jade uses <code>Result&lt;T&gt;</code> instead of exceptions:</p>
+
+<pre><code class="language-jade">sealed class Result&lt;T&gt; {
+    data class Ok(val value T)
+    data class Err(val msg str)
+}
+
+def divide(a f64, b f64) Result&lt;f64&gt; {
+    if b == 0.0 {
+        return Result.Err("division by zero");
+    }
+    return Result.Ok(a / b);
+}
+
+val result = divide(10.0, 2.0);
+
+when result {
+    is Ok(v)  -&gt; io.println("result: #{v}");
+    is Err(e) -&gt; io.println("error: #{e}");
+}</code></pre>
+
+<p>no try/catch. no exceptions flying around unpredictably. errors are just values you handle explicitly.</p>
+
+<hr>
+
+<h2>chapter 8 — type aliases</h2>
+
+<p>give complex types a readable name:</p>
+
+<pre><code class="language-jade">type UserId   = u32;
+type Handler  = def(Request) Response;
+type Matrix   = [][]f64;
+type MaybeInt = i32?;</code></pre>
+
+<p>now instead of writing <code>def(Request) Response</code> everywhere you just write <code>Handler</code>.</p>
+
+<hr>
+
+<h2>chapter 9 — decorators</h2>
+
+<p>decorators modify functions at runtime:</p>
+
+<pre><code class="language-jade">// built-in decorators
+@entry          // marks the program entry point
+@Suppress("JD601")  // suppress a compiler warning
+
+// web framework decorators
+val app = WebApp.new();
+
+@app.route("/")
+def index(req Request) Response {
+    return Response.ok("hello!");
+}
+
+@app.route("/users", method = "POST")
+def createUser(req Request) Response {
+    val name = req.body.get("name");
+    return Response.created("created #{name}");
+}</code></pre>
+
+<hr>
+
+<h2>chapter 10 — packages and imports</h2>
+
+<pre><code class="language-jade">// declare your package
+package com.yourname.myapp;
+
+// import standard library modules
+import jade.stdlib.io;
+import jade.stdlib.math;
+import jade.stdlib.fs;
+import jade.stdlib.os;
+import jade.stdlib.collections;
+
+// import specific things from a package
+import jade.stdlib.collections.{ List, Map, Set };</code></pre>
+
+<h3>jpkg — the package manager</h3>
+
+<pre><code class="language-bash">jpkg init                        # create jade.toml
+jpkg add com.someone.coolpackage # add a dependency
+jpkg install                     # install all deps
+jpkg build                       # compile your project
+jpkg run                         # build and run</code></pre>
+
+<p>your <code>jade.toml</code>:</p>
+
+<pre><code class="language-toml">[package]
+name    = "com.yourname.myapp"
+version = "1.0.0"
+license = "LGPL-3.0"
+
+[dependencies]
+"jade.stdlib" = "0.1.0-alpha"
+
+[build]
+entry  = "src/main.jsc"
+output = "out/main.joc"</code></pre>
+
+<hr>
+
+<h2>chapter 11 — the .joc format</h2>
+
+<p>when you compile a <code>.jsc</code> file you get a <code>.joc</code> file. <code>.joc</code> is a fat binary — it contains:</p>
+
+<ul><li>native machine code for your architecture</li><li>LLVM bitcode fallback (runs on any architecture via JIT)</li></ul>
+
+<pre><code class="language-bash">jscc main.jsc                          # host + bytecode (default)
+jscc main.jsc --target=aarch64-linux   # add ARM64 slice
+jscc main.jsc --bytecode-only          # portable only
+jscc main.jsc --no-bytecode            # native only, smaller</code></pre>
+
+<pre><code class="language-bash">jvk main.joc                 # run (picks best slice automatically)
+jvk main.joc --jit-only      # force JIT
+jvk main.joc --info          # show what's inside the .joc</code></pre>
+
+<hr>
+
+<h2>quick reference</h2>
+
+<h3>keywords</h3>
+<table><tr><th>keyword</th><th>what it does</th></tr><tr><td><code>def</code></td><td>declare a function</td></tr><tr><td><code>val</code></td><td>immutable variable</td></tr><tr><td><code>var</code></td><td>mutable variable</td></tr><tr><td><code>class</code></td><td>declare a class</td></tr><tr><td><code>data</code></td><td>data class (with primary constructor)</td></tr><tr><td><code>sealed</code></td><td>sealed class (exhaustive when matching)</td></tr><tr><td><code>trait</code></td><td>interface/trait</td></tr><tr><td><code>type</code></td><td>type alias</td></tr><tr><td><code>import</code></td><td>import a package</td></tr><tr><td><code>package</code></td><td>declare current package</td></tr><tr><td><code>when</code></td><td>pattern matching</td></tr><tr><td><code>is</code></td><td>pattern match arm</td></tr><tr><td><code>for</code></td><td>for loop</td></tr><tr><td><code>while</code></td><td>while loop</td></tr><tr><td><code>if</code></td><td>conditional</td></tr><tr><td><code>else</code></td><td>else branch</td></tr><tr><td><code>return</code></td><td>return from function</td></tr><tr><td><code>async</code></td><td>async function</td></tr><tr><td><code>await</code></td><td>await async result</td></tr></table>
+
+<h3>naming conventions</h3>
+<table><tr><th>thing</th><th>style</th><th>example</th></tr><tr><td>functions</td><td>camelCase</td><td><code>getUserById</code></td></tr><tr><td>variables</td><td>camelCase</td><td><code>userName</code></td></tr><tr><td>classes</td><td>PascalCase</td><td><code>UserAccount</code></td></tr><tr><td>packages</td><td>lowercase.dotted</td><td><code>jade.stdlib.io</code></td></tr><tr><td>type aliases</td><td>PascalCase</td><td><code>UserId</code></td></tr></table>
+
+<h3>common stdlib modules</h3>
+<table><tr><th>module</th><th>what it has</th></tr><tr><td><code>jade.stdlib.io</code></td><td>println, print, readln</td></tr><tr><td><code>jade.stdlib.math</code></td><td>sqrt, sin, cos, PI, random</td></tr><tr><td><code>jade.stdlib.fs</code></td><td>read, write, exists, mkdir</td></tr><tr><td><code>jade.stdlib.os</code></td><td>platform, arch, env, exit</td></tr><tr><td><code>jade.stdlib.collections</code></td><td>List, Map, Set</td></tr></table>
+
+<hr>
+
+<h2>what's next?</h2>
+
+<ul><li>read the showcase file (<code>showcase.jsc</code>) in the JadeLang repo</li><li>build something small — a calculator, a todo list, a guessing game</li><li>check <a href="https://github.com/Fundiman/jade-pkgs">github.com/Fundiman/jade-pkgs</a> for community packages</li><li>contribute to JadeLang itself</li></ul>
+
+<p>welcome to Jade. 🫡</p>
+
+</main>
+
+<footer>
+  <p>© 2026 <a href="https://github.com/Fundiman">Fundiman</a> — <a href="https://github.com/Fundiman/jade-docs">jade-docs</a> — <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a></p>
+  <p><a href="https://github.com/Fundiman/JadeLang">JadeLang</a> · <a href="https://github.com/Fundiman/jade-pkgs">jade-pkgs</a> · <a href="https://github.com/Fundiman/jade-docs">jade-docs</a></p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pattern matching — jade-docs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --jade:     #1D9E75;
+    --jade-dim: #0F6E56;
+    --jade-bg:  #E1F5EE;
+    --ink:      #0e1a14;
+    --ink-dim:  #3a5245;
+    --ink-mute: #7a9e8e;
+    --paper:    #f7faf8;
+    --card:     #ffffff;
+    --border:   #d4e8de;
+    --mono:     'DM Mono', monospace;
+    --serif:    'Fraunces', serif;
+    --sans:     'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--sans); background: var(--paper); color: var(--ink); min-height: 100vh; }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    background: var(--card);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .logo-name { font-family: var(--serif); font-weight: 600; font-size: 1.2rem; color: var(--jade-dim); letter-spacing: -0.02em; }
+  .logo-version { font-family: var(--mono); font-size: 0.68rem; color: var(--ink-mute); background: var(--jade-bg); padding: 2px 7px; border-radius: 20px; border: 1px solid var(--border); }
+  nav a { font-size: 0.85rem; color: var(--ink-dim); text-decoration: none; margin-left: 1.5rem; transition: color .15s; }
+  nav a:hover { color: var(--jade); }
+
+  main {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 3rem 2rem 5rem;
+  }
+
+  h1 { font-family: var(--serif); font-size: 2.2rem; font-weight: 300; color: var(--ink); margin: 0 0 1.5rem; letter-spacing: -0.02em; line-height: 1.2; }
+  h2 { font-family: var(--serif); font-size: 1.4rem; font-weight: 300; color: var(--ink); margin: 2.5rem 0 1rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 1rem; font-weight: 500; color: var(--ink); margin: 1.8rem 0 0.6rem; }
+  h4 { font-size: 0.9rem; font-weight: 500; color: var(--ink-dim); margin: 1.2rem 0 0.4rem; }
+  h5, h6 { font-size: 0.85rem; font-weight: 500; color: var(--ink-mute); margin: 1rem 0 0.3rem; }
+
+  p { font-size: 0.95rem; line-height: 1.75; color: var(--ink-dim); margin: 0 0 1rem; }
+  a { color: var(--jade-dim); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  strong { font-weight: 500; color: var(--ink); }
+  em { font-style: italic; }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.82em;
+    background: var(--jade-bg);
+    color: var(--jade-dim);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+
+  pre {
+    background: var(--ink);
+    border-radius: 10px;
+    padding: 1.2rem 1.4rem;
+    margin: 1rem 0 1.5rem;
+    overflow-x: auto;
+    border: 1px solid #1a2e25;
+  }
+  pre code {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.65;
+    background: none;
+    color: #a8e6cf;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+  }
+
+  ul, ol { padding-left: 1.4rem; margin: 0 0 1rem; }
+  li { font-size: 0.95rem; line-height: 1.75; color: var(--ink-dim); margin-bottom: 0.2rem; }
+  li code { font-size: 0.8em; }
+
+  blockquote {
+    border-left: 3px solid var(--jade);
+    padding: 0.6rem 1rem;
+    margin: 1rem 0;
+    background: var(--jade-bg);
+    border-radius: 0 6px 6px 0;
+  }
+  blockquote p { margin: 0; color: var(--jade-dim); font-size: 0.9rem; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.5rem;
+    font-size: 0.88rem;
+  }
+  th {
+    background: var(--jade-bg);
+    color: var(--jade-dim);
+    font-weight: 500;
+    text-align: left;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+  }
+  td {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    color: var(--ink-dim);
+    line-height: 1.5;
+  }
+  tr:nth-child(even) td { background: var(--paper); }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+  }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    background: var(--card);
+  }
+  footer p { font-size: 0.78rem; color: var(--ink-mute); font-family: var(--mono); }
+  footer a { color: var(--jade-dim); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 600px) {
+    nav { display: none; }
+    main { padding: 2rem 1rem 4rem; }
+    h1 { font-size: 1.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../index.html" class="logo">
+    <svg width="28" height="28" viewBox="0 0 100 100">
+      <polygon points="50,5 85,25 85,75 50,95 15,75 15,25" fill="#E1F5EE" stroke="#1D9E75" stroke-width="3"/>
+      <polygon points="50,20 72,33 72,67 50,80 28,67 28,33" fill="#1D9E75" opacity="0.3"/>
+      <polygon points="50,32 64,40 64,60 50,68 36,60 36,40" fill="#1D9E75" opacity="0.65"/>
+      <circle cx="50" cy="50" r="6" fill="#0F6E56"/>
+    </svg>
+    <span class="logo-name">jade-docs</span>
+    <span class="logo-version">v0.1.0-alpha</span>
+  </a>
+  <nav>
+    <a href="../guide/01-getting-started.html">guides</a>
+    <a href="../stdlib/io.html">stdlib</a>
+    <a href="../reference/syntax.html">reference</a>
+    <a href="https://github.com/Fundiman/JadeLang">github</a>
+  </nav>
+</header>
+
+<main>
+<h1>pattern matching</h1>
+
+<p><code>when</code> is Jade's pattern matching expression. it's like a switch statement but far more powerful.</p>
+
+<hr>
+
+<h2>basic when</h2>
+
+<pre><code class="language-jade">val x = 42;
+
+when x {
+    is 1  -&gt; io.println("one");
+    is 2  -&gt; io.println("two");
+    is 42 -&gt; io.println("the answer");
+    is _  -&gt; io.println("something else");
+}</code></pre>
+
+<p><code>_</code> is the wildcard — matches anything.</p>
+
+<hr>
+
+<h2>when as an expression</h2>
+
+<p><code>when</code> returns a value:</p>
+
+<pre><code class="language-jade">val label = when x {
+    is 1  -&gt; "one";
+    is 2  -&gt; "two";
+    is _  -&gt; "other";
+};
+
+io.println(label);</code></pre>
+
+<hr>
+
+<h2>matching sealed classes</h2>
+
+<p>the most common use — destructure variant data:</p>
+
+<pre><code class="language-jade">sealed class Shape {
+    data class Circle(val radius f64)
+    data class Rectangle(val w f64, val h f64)
+}
+
+val s = Shape.Circle(5.0);
+
+when s {
+    is Circle(r)       -&gt; io.println("circle, radius #{r}");
+    is Rectangle(w, h) -&gt; io.println("rect #{w}x#{h}");
+}</code></pre>
+
+<hr>
+
+<h2>matching Result and Option</h2>
+
+<pre><code class="language-jade">val result = divide(10.0, 0.0);
+
+when result {
+    is Ok(v)  -&gt; io.println("got #{v}");
+    is Err(e) -&gt; io.println("failed: #{e}");
+}
+
+val maybe = findUser(42);
+
+when maybe {
+    is Some(u) -&gt; io.println("user: #{u.name}");
+    is None()  -&gt; io.println("not found");
+}</code></pre>
+
+<hr>
+
+<h2>matching tuples</h2>
+
+<pre><code class="language-jade">val pair = (1, "hello");
+
+when pair {
+    is (1, s) -&gt; io.println("one and #{s}");
+    is (n, _) -&gt; io.println("number #{n}");
+}</code></pre>
+
+<hr>
+
+<h2>guards</h2>
+
+<p>add conditions to arms with <code>if</code>:</p>
+
+<pre><code class="language-jade">val n = 42;
+
+when n {
+    is x if x &lt; 0   -&gt; io.println("negative");
+    is x if x == 0  -&gt; io.println("zero");
+    is x if x &gt; 100 -&gt; io.println("big");
+    is x             -&gt; io.println("normal: #{x}");
+}</code></pre>
+
+<hr>
+
+<h2>multi-line arm bodies</h2>
+
+<p>use <code>{}</code> for multi-line arms:</p>
+
+<pre><code class="language-jade">when result {
+    is Ok(v) -&gt; {
+        io.println("success!");
+        io.println("value: #{v}");
+        processValue(v);
+    }
+    is Err(e) -&gt; {
+        io.println("error: #{e}");
+        logError(e);
+    }
+}</code></pre>
+
+<hr>
+
+<h2>exhaustiveness</h2>
+
+<p>sealed class matching must be exhaustive — you must handle every variant:</p>
+
+<pre><code class="language-jade">sealed class Color {
+    data class Red()
+    data class Green()
+    data class Blue()
+}
+
+// this is a compile error — Blue not handled
+when color {
+    is Red()   -&gt; "red";
+    is Green() -&gt; "green";
+    // error[JD501]: non-exhaustive when — missing Blue
+}
+
+// fix: add Blue or use wildcard
+when color {
+    is Red()   -&gt; "red";
+    is Green() -&gt; "green";
+    is Blue()  -&gt; "blue";
+}</code></pre>
+
+</main>
+
+<footer>
+  <p>© 2026 <a href="https://github.com/Fundiman">Fundiman</a> — <a href="https://github.com/Fundiman/jade-docs">jade-docs</a> — <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a></p>
+  <p><a href="https://github.com/Fundiman/JadeLang">JadeLang</a> · <a href="https://github.com/Fundiman/jade-pkgs">jade-pkgs</a> · <a href="https://github.com/Fundiman/jade-docs">jade-docs</a></p>
+</footer>
+
+</body>
+</html>

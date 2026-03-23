@@ -1,0 +1,415 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// jade syntax showcase — every feature in one file
+// ─────────────────────────────────────────────────────────────────────────────
+
+package jade.Showcase;
+
+import jade.stdlib.io;
+import jade.stdlib.math;
+import jade.stdlib.net.http;
+import jade.stdlib.collections.{ List, Map, Set };
+
+// ─── type aliases ─────────────────────────────────────────────────────────────
+
+type UserId    = u32;
+type Username  = str;
+type Score     = f64;
+type Callback  = def(str) void;
+type Handler   = def(Request) Response;
+type Matrix    = [][]f64;
+type MaybeInt  = i32?;
+
+// ─── constants ────────────────────────────────────────────────────────────────
+
+val MAX_RETRIES = 3;
+val APP_NAME    = "Jade Showcase";
+val PI          = 3.14159265358979;
+
+// ─── enums ────────────────────────────────────────────────────────────────────
+
+sealed class Color {
+    data class Red()
+    data class Green()
+    data class Blue()
+    data class Custom(val r u8, val g u8, val b u8)
+}
+
+sealed class Result<T> {
+    data class Ok(val value T)
+    data class Err(val msg str)
+}
+
+sealed class Option<T> {
+    data class Some(val value T)
+    data class None()
+}
+
+// ─── traits ───────────────────────────────────────────────────────────────────
+
+trait Printable {
+    def print() void;
+    def toString() str;
+}
+
+trait Serializable {
+    def toJson() str;
+    def toBytes() []u8;
+}
+
+trait Comparable<T> {
+    def compareTo(other T) i32;
+    def equals(other T) bool;
+}
+
+// ─── data classes ─────────────────────────────────────────────────────────────
+
+data class Point(val x f64, val y f64);
+
+data class User(
+    val id     UserId,
+    val name   Username,
+    val email  str,
+    val score  Score
+) {
+    // method on data class
+    def isAdmin() bool = name == "admin";
+
+    def greet() str = "hello, #{name}!";
+
+    // multi-line method
+    def summary() str {
+        return "User(#{id}): #{name} <#{email}> score=#{score}";
+    }
+}
+
+// ─── regular classes ──────────────────────────────────────────────────────────
+
+class Animal {
+    val name str
+    val sound str
+    var age i32
+
+    def speak() str = "#{name} says #{sound}";
+
+    def birthday() {
+        age += 1;
+        io.println("#{name} is now #{age}!");
+    }
+}
+
+// generic class
+class Stack<T> {
+    var items []T
+
+    def push(item T) {
+        items.append(item);
+    }
+
+    def pop() Option<T> {
+        if items.isEmpty() {
+            return Option.None();
+        }
+        return Option.Some(items.removeLast());
+    }
+
+    def peek() Option<T> = items.isEmpty()
+        ? Option.None()
+        : Option.Some(items.last());
+
+    def size() i32 = items.len();
+}
+
+// ─── decorators ───────────────────────────────────────────────────────────────
+
+val app = WebApp.new();
+
+// runtime wrapper decorator — wraps the function at startup
+@app.route("/")
+def index(req Request) Response {
+    return Response.ok("hewwo from Jade! >W<");
+}
+
+@app.route("/users", method = "POST")
+def createUser(req Request) Response {
+    val name = req.body.get("name");
+    return Response.created("created #{name}");
+}
+
+@app.route("/users/:id", method = "GET")
+def getUser(req Request) Response {
+    val id = req.params.get("id");
+    return Response.ok("user #{id}");
+}
+
+// custom decorator definition
+def retry(times i32) def(def() Result<str>) def() Result<str> {
+    return def(fn def() Result<str>) def() Result<str> {
+        return def() Result<str> {
+            var attempts = 0;
+            while attempts < times {
+                val result = fn();
+                when result {
+                    is Ok(v) -> return Result.Ok(v);
+                    is Err(e) -> attempts += 1;
+                }
+            }
+            return Result.Err("failed after #{times} attempts");
+        };
+    };
+}
+
+@retry(3)
+def fetchData(url str) Result<str> {
+    return http.get(url);
+}
+
+// suppress naming warnings
+@Suppress("JD602")
+data class legacyThing(val data str);
+
+// ─── functions ────────────────────────────────────────────────────────────────
+
+// basic function
+def add(a i32, b i32) i32 = a + b;
+
+// default arguments
+def greet(name str = "world", excited bool = false) str {
+    val msg = "hello, #{name}";
+    return excited ? "#{msg}!!!" : msg;
+}
+
+// multiple return values via tuple
+def minMax(arr []i32) (i32, i32) {
+    var min = arr[0];
+    var max = arr[0];
+    for x in arr {
+        if x < min { min = x; }
+        if x > max { max = x; }
+    }
+    return (min, max);
+}
+
+// generic function
+def map<T, U>(arr []T, fn def(T) U) []U {
+    var result []U;
+    for item in arr {
+        result.append(fn(item));
+    }
+    return result;
+}
+
+def filter<T>(arr []T, pred def(T) bool) []T {
+    var result []T;
+    for item in arr {
+        if pred(item) { result.append(item); }
+    }
+    return result;
+}
+
+// recursive function
+def fibonacci(n i32) i32 {
+    if n <= 1 { return n; }
+    return fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+// async function
+async def fetchUser(id UserId) Result<User> {
+    val response = http.get("https://api.example.com/users/#{id}").await();
+    when response {
+        is Ok(data)  -> return Result.Ok(User.fromJson(data));
+        is Err(msg)  -> return Result.Err("fetch failed: #{msg}");
+    }
+}
+
+// ─── control flow ─────────────────────────────────────────────────────────────
+
+def controlFlowExamples() {
+    val x = 42;
+
+    // if / else if / else
+    if x > 100 {
+        io.println("big");
+    } else if x > 50 {
+        io.println("medium");
+    } else {
+        io.println("small");
+    }
+
+    // when (pattern matching)
+    val color = Color.Custom(255, 128, 0);
+    when color {
+        is Red()         -> io.println("red");
+        is Green()       -> io.println("green");
+        is Blue()        -> io.println("blue");
+        is Custom(r,g,b) -> io.println("rgb(#{r},#{g},#{b})");
+    }
+
+    // when as expression
+    val label = when color {
+        is Red()   -> "red";
+        is Green() -> "green";
+        is Blue()  -> "blue";
+        is Custom(r,g,b) -> "custom";
+    };
+
+    // for loop
+    for i in 0..10 {
+        io.println("i = #{i}");
+    }
+
+    // for over collection
+    val names = ["Alice", "Bob", "Charlie"];
+    for name in names {
+        io.println("hello #{name}");
+    }
+
+    // while loop
+    var count = 0;
+    while count < 5 {
+        io.println("count = #{count}");
+        count += 1;
+    }
+}
+
+// ─── variables ────────────────────────────────────────────────────────────────
+
+def variableExamples() {
+    // immutable
+    val name    = "Jade";
+    val version = 1;
+    val pi      = 3.14159;
+    val flag    = true;
+
+    // mutable
+    var counter = 0;
+    var message = "hello";
+
+    // explicit types
+    val id   u32  = 42;
+    val temp f64  = 98.6;
+    var buf  []u8 = [];
+
+    // tuple destructuring
+    val (lo, hi) = minMax([3, 1, 4, 1, 5, 9, 2, 6]);
+    io.println("min=#{lo} max=#{hi}");
+
+    // nullable
+    val maybeValue MaybeInt = null;
+    val definiteValue MaybeInt = 42;
+}
+
+// ─── string interpolation ─────────────────────────────────────────────────────
+
+def stringExamples() {
+    val name    = "Jade";
+    val version = 1;
+    val score   = 9.5;
+
+    // basic interpolation
+    io.println("hello from #{name}!");
+
+    // expressions inside interpolation
+    io.println("2 + 2 = #{2 + 2}");
+    io.println("name is #{name.len()} chars long");
+    io.println("score: #{score * 100}%");
+
+    // multiline string
+    val msg = "
+        welcome to #{name} v#{version}
+        the language pug wants to kill
+    ";
+}
+
+// ─── collections ──────────────────────────────────────────────────────────────
+
+def collectionExamples() {
+    // arrays
+    val nums    = [1, 2, 3, 4, 5];
+    val strs    = ["a", "b", "c"];
+    var empty   []i32 = [];
+
+    // array operations
+    val doubled = map(nums, def(x i32) i32 = x * 2);
+    val evens   = filter(nums, def(x i32) bool = x % 2 == 0);
+
+    // map (dictionary)
+    val scores Map<str, i32> = {
+        "Alice": 95,
+        "Bob":   87,
+        "Carol": 92
+    };
+
+    // set
+    val unique Set<str> = {"apple", "banana", "cherry"};
+
+    // stack using our generic class
+    val stack = Stack<i32>.new();
+    stack.push(1);
+    stack.push(2);
+    stack.push(3);
+    val top = stack.pop();
+}
+
+// ─── error handling ───────────────────────────────────────────────────────────
+
+def divide(a f64, b f64) Result<f64> {
+    if b == 0.0 {
+        return Result.Err("division by zero");
+    }
+    return Result.Ok(a / b);
+}
+
+def errorHandlingExamples() {
+    val result = divide(10.0, 2.0);
+
+    when result {
+        is Ok(v)  -> io.println("result: #{v}");
+        is Err(e) -> io.println("error: #{e}");
+    }
+
+    // chained
+    val final = divide(100.0, 4.0)
+        .map(def(x f64) f64 = x * 2.0)
+        .unwrapOr(0.0);
+}
+
+// ─── async / await ────────────────────────────────────────────────────────────
+
+async def asyncExamples() {
+    // sequential await
+    val user     = fetchUser(1).await();
+    val response = http.get("https://example.com").await();
+
+    // parallel — run both at once
+    val (userData, pageData) = parallel(
+        fetchUser(42),
+        http.get("https://example.com/page")
+    ).await();
+
+    when userData {
+        is Ok(u)  -> io.println("got user: #{u.name}");
+        is Err(e) -> io.println("user error: #{e}");
+    }
+}
+
+// ─── entry point ──────────────────────────────────────────────────────────────
+
+@entry
+def main(args []str) i32 {
+    io.println("─── #{APP_NAME} ───");
+
+    controlFlowExamples();
+    variableExamples();
+    stringExamples();
+    collectionExamples();
+    errorHandlingExamples();
+
+    val user = User(1, "jade_dev", "jade@example.com", 100.0);
+    io.println(user.summary());
+    io.println(user.greet());
+
+    val fib10 = fibonacci(10);
+    io.println("fibonacci(10) = #{fib10}");
+
+    return 0;
+}
